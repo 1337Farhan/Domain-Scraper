@@ -1,64 +1,90 @@
 import requests
 import bs4
-import keyboard
+import time
 
+print('''
 # Python DomainScraper Alfa version 1
 # BY 1337FARHAN & MSRBQ
 # All rights reserved to the owners of the script
 # Contact jx@outlook.cl for furhter information
+# Note: the number of results is based on a search engine and might not be 100% accurate.
+#       you can increase the limit to make sure all actual results have been scraped.
+''')
 
-
+time.sleep(3)
 
 # Base URL
 Bing = 'http://bing.com/search'
 
-# To save the URLs
+# Find desired URLs
 urls = []
 
-# Find desired URLs
+
 def lookup(div):
+
     for _ in div:
         url = _.find('cite')
         urls.append(url.text)
     return urls
 
-# Loop through Bing pages for more results
-def checker(ip: str, first, limit):
+def domainFilter(urls):
+    _urls = []
+
+    for url in urls:
+        url = url.split('/', 3)
+        try:
+            if url[2]:
+                _url = url[2]
+        except:
+            _url = url[0]
+        _urls.append(_url)
+    urls = set(_urls[:])
+    return urls;
+
+def fileSave(save):
+    global urls
+    _urls = domainFilter(urls)
+    with open('Output.txt', 'w') as outfile:
+        if save is True:
+            for url in _urls:
+                outfile.writelines(url + '\n')
+        else:
+            for url in _urls:
+                print(url)
+
+
+# Building the request for each call
+
+
+def Req(ip: str, save: bool, first=0, limit=150):
     count = 50
 
     # Create the request and get the response
-    _params = {'q': f'ip:{ip} | ip:{ip}', 'responseFilter' : 'Webpages', 'count' : f'{count}', 'first' : f'{first}'}
-    
-    # _params = {'q': f'ip:{ip} | ip:{ip}', 'responseFilter' : 'Webpages', 'count' : f'{count}', 'first' : f'{first}'}
-    #      " | " is used to force Bing to a spicific IP, 
-    #      "responseFilter" to get only the webpages and make the job easier, 
-    #      "count" the number of results per page {Maximum:50},
-    #      "first" the anchor {where to start the search} ex. first=50 will skip the first 50 results and give the response {No maximum}
+    _params = {'q': f'ip:{ip} | ip:{ip}', 'responseFilter': 'Webpages',
+               'count': f'{count}', 'first': f'{first}'}
 
-    r = requests.get(Bing, params= _params)
+    r = requests.get(Bing, params=_params)
 
     # Parsing the source code
     soup = bs4.BeautifulSoup(r.text, 'html.parser')
-    div = soup.findAll('div', {'class':'b_attribution'})
+    div = soup.findAll('div', {'class': 'b_attribution'})
 
-    # In case if the page is empty
-    if not div:
-        print(urls)
-        print('Could not find anymore results.')
-        exit()
-    # Print results when the user limit is reached
     if first < limit:
         lookup(div)
         first = first + count
-        checker(ip, first, limit)
+        Req(ip, save, first, limit)
+
     else:
-        print(urls)
-        exit()
-
-    
-ip = input('IP: ')
-_limit = int(input('Number of limit (Must be a multiple of 50): '))
-
-checker(ip, 0, limit=_limit)
+        fileSave(save)
 
 
+ip = input('IP: ').strip()
+_limit = int(input('Number of limit (Must be a multiple of 50): ').strip())
+_save = input('Save to output.txt - Y/n? ').strip()
+
+if _save.lower() == 'y':
+    _save = True
+else:
+    _save = False
+
+Req(ip, _save, 0, limit=_limit)
