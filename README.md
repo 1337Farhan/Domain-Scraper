@@ -11,4 +11,4 @@ Run the script with Python3, the script will promt you to enter an IP address an
 The output depends on the search engine, results might not be 100% accurate.
 
 # Special thanks:
-GitHub & Instagram - @msrbq
+<a href="https://github.com/Moha369"> @Moha369<a>
