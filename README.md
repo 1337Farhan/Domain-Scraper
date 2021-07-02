@@ -1,5 +1,5 @@
 # DomainScraper (by @1337Farhan)
-Find domains from a specific ip adress.
+Find domains from a specific IP adress.
 
 # Disclaimer:
 The creator of the tool is not responsible for any misuse!
